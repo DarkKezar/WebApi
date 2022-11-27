@@ -9,4 +9,5 @@ public class User : IdentityUser<Guid>
     public string PhotoSrc { get; set; }
     public Farm MyFarm { get; set; }
     public List<Farm> Collaborations { get; set; }
+    public bool isDeleted { get; set; }
 }
