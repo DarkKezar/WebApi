@@ -11,21 +11,21 @@ public class PetsListController : Controller
 
     [HttpGet]
     [Route("GetPets")]
-    public async Task<List<Pet>> GetPets()
+    public async Task<List<Pet>> GetPetsAsync(Guid FarmId)
     {
         return new List<Pet>();
     }
     
     [HttpPatch]
     [Route("FeedPets")]
-    public async Task<ActionResult> FeedPets(Guid Id)
+    public async Task<ActionResult> FeedPetsAsync(List<Guid> ids)
     {
         return new OkResult();
     }
     
     [HttpPatch]
     [Route("GetDrinkPets")]
-    public async Task<ActionResult> GetDrinkPets(Guid Id)
+    public async Task<ActionResult> GetDrinkPetsAsync(List<Guid> ids)
     {
         return new OkResult();
     }

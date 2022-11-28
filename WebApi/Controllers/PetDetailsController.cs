@@ -1,5 +1,6 @@
 using Core.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Service.DTO;
 
 namespace WebApi.Controllers;
 
@@ -12,28 +13,28 @@ public class PetDetailsController : Controller
 
     [HttpGet]
     [Route("Pet")]
-    public async Task<Pet> GetPet(Guid id)
+    public async Task<Pet> GetPetAsync(Guid id)
     {
         return new Pet();
     }
     
     [HttpPost]
     [Route("CreatePet")]
-    public async Task<ActionResult> CreatePet()
+    public async Task<ActionResult> CreatePetAsync(PetCreationModel model)
     {
         return new OkResult();
     }
 
     [HttpPatch]
     [Route("FeedPet")]
-    public async Task<ActionResult> FeedPet(Guid Id)
+    public async Task<ActionResult> FeedPetAsync(Guid Id)
     {
         return new OkResult();
     }
     
     [HttpPatch]
     [Route("GetDrinkPet")]
-    public async Task<ActionResult> GetDrinkPet(Guid Id)
+    public async Task<ActionResult> GetDrinkPetAsync(Guid Id)
     {
         return new OkResult();
     }

@@ -12,14 +12,14 @@ public class FarmDetailsController : Controller
 
     [HttpGet]
     [Route("Farm")]
-    public async Task<Farm> FarmInfo(Guid Id)
+    public async Task<Farm> FarmInfoAsync(Guid Id)
     {
         return new Farm();
     }
     
     [HttpPost]
     [Route("AddUser")]
-    public async Task<ActionResult> InviteFriend(string email)
+    public async Task<ActionResult> InviteFriendAsync(string email)
     {
         return new OkResult();
     }
