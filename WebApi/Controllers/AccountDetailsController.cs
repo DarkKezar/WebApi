@@ -24,6 +24,7 @@ public class AccountDetailsController : Controller
     }
 
     [HttpGet]
+    [Route("GetUser")]
     public async Task<UserShowModel> GetUserDataAsync()
     {
         return new UserShowModel();
