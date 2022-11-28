@@ -21,7 +21,7 @@ public class AuthController : Controller
         _userManager = userManager;
     }
     
-    [Route("login")]
+    [Route("signIn")]
     [HttpPost]
     public async Task<IResult> AuthAsync(string email, string password)
     {
