@@ -19,9 +19,7 @@ builder.Services.AddIdentity<User, Role>().AddEntityFrameworkStores<AppContext>(
 
 
 //DI
-builder.Services.AddAutoMapper(typeof(AppMappingFarm));
-builder.Services.AddAutoMapper(typeof(AppMappingUser));
-builder.Services.AddAutoMapper(typeof(AppMappingPet));
+builder.Services.AddAutoMapper(typeof(AppMappingFarm), typeof(AppMappingUser), typeof(AppMappingUser));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
