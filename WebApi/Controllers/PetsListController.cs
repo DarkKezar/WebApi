@@ -11,7 +11,7 @@ public class PetsListController : Controller
 
     [HttpGet]
     [Route("GetPets")]
-    public async Task<List<Pet>> GetPetsAsync(Guid FarmId)
+    public async Task<ActionResult<List<Pet>>> GetPetsAsync(Guid FarmId)
     {
         return new List<Pet>();
     }

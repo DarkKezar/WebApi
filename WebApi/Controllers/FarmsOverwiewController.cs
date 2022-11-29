@@ -12,7 +12,7 @@ public class FarmsOverwiewController : Controller
 
     [HttpGet]
     [Route("MyFarm")]
-    public async Task<Farm> GetMyFarmAsync()
+    public async Task<ActionResult<Farm>> GetMyFarmAsync()
     {
         return new Farm();
     }

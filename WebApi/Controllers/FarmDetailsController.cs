@@ -12,7 +12,7 @@ public class FarmDetailsController : Controller
 
     [HttpGet]
     [Route("Farm")]
-    public async Task<Farm> FarmInfoAsync(Guid Id)
+    public async Task<ActionResult<Farm>> FarmInfoAsync(Guid Id)
     {
         return new Farm();
     }

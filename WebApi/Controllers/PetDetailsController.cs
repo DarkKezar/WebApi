@@ -13,7 +13,7 @@ public class PetDetailsController : Controller
 
     [HttpGet]
     [Route("Pet")]
-    public async Task<Pet> GetPetAsync(Guid id)
+    public async Task<ActionResult<Pet>> GetPetAsync(Guid id)
     {
         return new Pet();
     }
