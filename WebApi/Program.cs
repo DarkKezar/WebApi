@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
+using Service.AutoMappers;
 using AppContext = Core.Context.AppContext;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,12 @@ builder.Services
     .AddDbContext<AppContext>
         (options => options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]));
 builder.Services.AddIdentity<User, Role>().AddEntityFrameworkStores<AppContext>();
+
+
+//DI
+builder.Services.AddAutoMapper(typeof(AppMappingFarm));
+builder.Services.AddAutoMapper(typeof(AppMappingUser));
+builder.Services.AddAutoMapper(typeof(AppMappingPet));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
