@@ -14,9 +14,10 @@ public class PetRepository : IPetRepository
         _context = context;
     }
 
-    public async Task CreatePetAsync(Pet pet)
+    public async Task CreatePetAsync(Pet pet, PetStats stats)
     {
         await _context.Pets.AddAsync(pet);
+        await _context.PetStats.AddAsync(stats);
         await _context.SaveChangesAsync();
     }
 
@@ -40,5 +41,10 @@ public class PetRepository : IPetRepository
     public async Task<List<Pet>> ReadAllPetsAsync(Guid farmId)
     {
         return await _context.Pets.Where(p => p.Farm.Id == farmId).ToListAsync();
+    }
+
+    public async Task<bool> isExistAsync(string name)
+    {
+        return (await _context.Pets.CountAsync(p => p.Name == name)) > 0;
     }
 }

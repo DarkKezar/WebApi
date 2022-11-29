@@ -9,4 +9,5 @@ public class UserAction
     public Pet Pet { get; set; }
     public User User { get; set; }
     public ActionEnum Action { get; set; }
+    public DateTime Date { get; set; }
 }

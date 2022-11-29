@@ -30,6 +30,12 @@ public class UserActionRepository : IUserActionRepository
         return await _context.Actions.FirstAsync(a => a.Id == id);
     }
 
+    public async Task<UserAction> ReadLastUserActionAsync(Guid petId, ActionEnum type)
+    {
+        return await _context.Actions.OrderBy(a => a.Date).
+                            FirstAsync(p => p.Pet.Id == petId && p.Action == type);
+    }
+
     public async Task<List<UserAction>> ReadAllUserActionAsync(User user)
     {
         return await _context.Actions.Where(a => a.User == user).ToListAsync();

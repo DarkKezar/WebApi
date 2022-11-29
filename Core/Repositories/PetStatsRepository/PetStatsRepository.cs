@@ -34,7 +34,7 @@ public class PetStatsRepository : IPetStatsRepository
 
     public async Task<PetStats> ReadPetStatsAsync(Guid Id)
     {
-        return await _context.PetStats.FirstAsync(s => s.Id == Id);
+        return await _context.PetStats.FirstAsync(s => s.Pet.Id == Id);
     }
 
     public async Task<List<PetStats>> ReadPetStatsAsync(List<Guid> petsId)

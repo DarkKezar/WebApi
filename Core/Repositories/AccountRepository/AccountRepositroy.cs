@@ -35,9 +35,18 @@ public class AccountRepositroy : IAccountRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task<IdentityResult> UpdatePasswordAsync(User user, string oldPassword, string newPassword)
+    {
+        return await _userManager.ChangePasswordAsync(user, oldPassword,  newPassword);
+    }
+
     public async Task<User> ReadUserAsync(Guid id)
     {
         return await _context.Users.FirstAsync(u => u.Id == id);
+    }
+    public async Task<User> ReadUserAsync(string email)
+    {
+        return await _context.Users.FirstAsync(u => u.NormalizedEmail == email.ToUpper());
     }
 
     public async Task<List<User>> ReadAllUserAsync(int Count, int Page)
