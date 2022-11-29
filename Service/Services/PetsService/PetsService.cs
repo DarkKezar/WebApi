@@ -11,11 +11,13 @@ public class PetsService : IPetsService
 {
     private readonly IPetRepository _petRepository;
     private readonly IPetStatsRepository _statsRepository;
+    private readonly IAccountRepository _accountRepository;
 
-    public PetsService(IPetRepository petRepository, IPetStatsRepository statsRepository, IUserActionRepository actionRepository)
+    public PetsService(IPetRepository petRepository, IPetStatsRepository statsRepository, IAccountRepository accountRepository, IUserActionRepository actionRepository)
     {
         _petRepository = petRepository;
         _statsRepository = statsRepository;
+        _accountRepository = accountRepository;
         _actionRepository = actionRepository;
     }
 
@@ -34,7 +36,7 @@ public class PetsService : IPetsService
         }
     }
 
-    public async Task<ActionResult> FeedPetsAsync(Guid userId, List<Guid> ids)
+    public async Task<ActionResult> FeedPetsAsync(User user, List<Guid> ids)
     {
         List<ActionResult> answer = new List<ActionResult>();
         foreach (Guid id in ids)
@@ -52,7 +54,13 @@ public class PetsService : IPetsService
                         break;
                     default:
                         stats.HungerLevel++;
+                        UserAction action = new UserAction();
+                        action.Action = ActionEnum.FEED;
+                        action.Date = DateTime.Now;
+                        action.Pet = await _petRepository.ReadPetAsync(id);
+                        action.User = user;
                         await _statsRepository.UpdatePetStatsAsync(stats);
+                        await _actionRepository.CreateUserActionAsync(action);
                         answer.Add( new OkResult());
                         break;
                 }
@@ -63,7 +71,7 @@ public class PetsService : IPetsService
         return new OkObjectResult(answer);
     }
 
-    public async Task<ActionResult> GetDrinkPetsAsync(Guid userId, List<Guid> ids)
+    public async Task<ActionResult> GetDrinkPetsAsync(User user, List<Guid> ids)
     {
         List<ActionResult> answer = new List<ActionResult>();
         foreach (Guid id in ids)
@@ -81,6 +89,13 @@ public class PetsService : IPetsService
                         break;
                     default:
                         stats.ThirstyLevel++;
+                        UserAction action = new UserAction();
+                        action.Action = ActionEnum.DRINK;
+                        action.Date = DateTime.Now;
+                        action.Pet = await _petRepository.ReadPetAsync(id);
+                        action.User = user;
+                        await _statsRepository.UpdatePetStatsAsync(stats);
+                        await _actionRepository.CreateUserActionAsync(action);
                         await _statsRepository.UpdatePetStatsAsync(stats);
                         answer.Add( new OkResult());
                         break;

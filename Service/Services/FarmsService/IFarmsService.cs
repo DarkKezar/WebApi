@@ -6,7 +6,7 @@ namespace Service.Services.FarmsService;
 
 public interface IFarmsService
 {
-    public Task<ActionResult<Farm>> GetMyFarmAsync(Guid userId);
-    public Task<ActionResult<List<Farm>>> GetCollabFarmsAsync(Guid userId);
-    public Task<ActionResult> CreateNewFarmAsync(Guid userId, FarmCreationModel model);
+    public Task<ActionResult<Farm>> GetMyFarmAsync(User user);
+    public Task<ActionResult<List<Farm>>> GetCollabFarmsAsync(User user);
+    public Task<ActionResult> CreateNewFarmAsync(User user, FarmCreationModel model);
 }

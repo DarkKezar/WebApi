@@ -41,7 +41,7 @@ public class PetService : IPetService
         
     }
 
-    public async Task<ActionResult> CreatePetAsync(Guid userId, PetCreationModel model)
+    public async Task<ActionResult> CreatePetAsync(User user, PetCreationModel model)
     {
         if (!(await _petRepository.isExistAsync(model.Name)))
         {
@@ -51,7 +51,7 @@ public class PetService : IPetService
             
             //In ideal condition this must be transaction
             await _statsRepository.CreatePetStatsAsync(newPetStats);
-            newPet.Farm = (await _accountRepository.ReadUserAsync(userId)).MyFarm;
+            newPet.Farm = user.MyFarm;
             newPet.Stats = newPetStats;
             await _petRepository.CreatePetAsync(newPet, newPetStats);
             //transaction end
@@ -61,7 +61,7 @@ public class PetService : IPetService
         else return new BadRequestObjectResult("Already exist");
     }
 
-    public async Task<ActionResult> FeedPetAsync(Guid id)
+    public async Task<ActionResult> FeedPetAsync(User user, Guid id)
     {
         if ((await _actionRepository.ReadLastUserActionAsync(id, ActionEnum.FEED)).Date.AddDays(feedTime) < DateTime.Now)
         {
@@ -74,6 +74,13 @@ public class PetService : IPetService
                     return new BadRequestObjectResult("Pet is full");
                 default:
                     stats.HungerLevel++;
+                    UserAction action = new UserAction();
+                    action.Action = ActionEnum.FEED;
+                    action.Date = DateTime.Now;
+                    action.Pet = await _petRepository.ReadPetAsync(id);
+                    action.User = user;
+                    await _statsRepository.UpdatePetStatsAsync(stats);
+                    await _actionRepository.CreateUserActionAsync(action);
                     await _statsRepository.UpdatePetStatsAsync(stats);
                     return new OkResult();
             }
@@ -81,7 +88,7 @@ public class PetService : IPetService
         else return new BadRequestObjectResult("Already feed");
     }
 
-    public async Task<ActionResult> GetDrinkPetAsync(Guid id)
+    public async Task<ActionResult> GetDrinkPetAsync(User user, Guid id)
     {
         if ((await _actionRepository.ReadLastUserActionAsync(id, ActionEnum.DRINK)).Date.AddDays(feedTime) < DateTime.Now)
         {
@@ -94,6 +101,13 @@ public class PetService : IPetService
                     return new BadRequestObjectResult("Pet is full");
                 default:
                     stats.ThirstyLevel++;
+                    UserAction action = new UserAction();
+                    action.Action = ActionEnum.DRINK;
+                    action.Date = DateTime.Now;
+                    action.Pet = await _petRepository.ReadPetAsync(id);
+                    action.User = user;
+                    await _statsRepository.UpdatePetStatsAsync(stats);
+                    await _actionRepository.CreateUserActionAsync(action);
                     await _statsRepository.UpdatePetStatsAsync(stats);
                     return new OkResult();
             }

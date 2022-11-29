@@ -2,10 +2,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Core.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Service.DTO;
+using Service.Services.AccountService;
 
 namespace WebApi.Controllers;
 
@@ -15,26 +17,29 @@ public class AccountDetailsController : Controller
 {
     //some private readonly service
     private readonly IConfiguration _configuration;
+    private readonly IAccountService _accountService;
     private readonly UserManager<User> _userManager;
 
-    public AccountDetailsController(IConfiguration configuration, UserManager<User> userManager)
+    public AccountDetailsController(IConfiguration configuration, IAccountService accountService, UserManager<User> userManager)
     {
         _configuration = configuration;
+        _accountService = accountService;
         _userManager = userManager;
     }
 
     [HttpGet]
+    [Authorize]
     [Route("GetUser")]
     public async Task<ActionResult<UserShowModel>> GetUserDataAsync()
     {
-        return new UserShowModel();
+        return await _accountService.GetUserDataAsync((await _userManager.GetUserAsync(null)));
     }
 
     [HttpPost]
     [Route("SignUp")]
     public async Task<ActionResult> SignUpAsync(UserCreationModel model)
     {
-        return new OkResult();
+        return await _accountService.SignUpAsync(model);
     }
     
     [HttpPost]
@@ -73,28 +78,32 @@ public class AccountDetailsController : Controller
     }
 
     [HttpPatch]
+    [Authorize]
     [Route("ChangePassword")]
-    public async Task<ActionResult> ChangePasswordAsync(UserUpdateModel model)
+    public async Task<IdentityResult> ChangePasswordAsync(UserUpdateModel model)
     {
-        return new OkResult();
+        return await _accountService.ChangePasswordAsync(model, (await _userManager.GetUserAsync(null)));
     }
     [HttpPatch]
+    [Authorize]
     [Route("ChangeEmail")]
     public async Task<ActionResult> ChangeEmailAsync(UserUpdateModel model)
     {
-        return new OkResult();
+        return await _accountService.ChangeEmailAsync(model, (await _userManager.GetUserAsync(null)));
     }
     [HttpPatch]
+    [Authorize]
     [Route("ChangePhoto")]
     public async Task<ActionResult> ChangePhotoAsync(UserUpdateModel model)
     {
-        return new OkResult();
+        return await _accountService.ChangePhotoAsync(model, (await _userManager.GetUserAsync(null)));
     }
     [HttpPatch]
+    [Authorize]
     [Route("ChangeUserName")]
     public async Task<ActionResult> ChangeUserNameAsync(UserUpdateModel model)
     {
-        return new OkResult();
+        return await _accountService.ChangeUserNameAsync(model, (await _userManager.GetUserAsync(null)));
     }
 }
 

@@ -13,20 +13,20 @@ public class FarmsService : IFarmsService
     private readonly IFarmRepository _farmRepository;
     private readonly IMapper _mapper;
 
-    public async Task<ActionResult<Farm>> GetMyFarmAsync(Guid userId)
+    public async Task<ActionResult<Farm>> GetMyFarmAsync(User user)
     {
-        return (await _accountRepository.ReadUserAsync(userId)).MyFarm;
+        return user.MyFarm;
     }
 
-    public async Task<ActionResult<List<Farm>>> GetCollabFarmsAsync(Guid userId)
+    public async Task<ActionResult<List<Farm>>> GetCollabFarmsAsync(User user)
     {
-        return (await _accountRepository.ReadUserAsync(userId)).Collaborations;
+        return user.Collaborations;
     }
 
-    public async Task<ActionResult> CreateNewFarmAsync(Guid userId, FarmCreationModel model)
+    public async Task<ActionResult> CreateNewFarmAsync(User user, FarmCreationModel model)
     {
         Farm newFarm = _mapper.Map<Farm>(model);
-        newFarm.FarmOwner = await _accountRepository.ReadUserAsync(userId);
+        newFarm.FarmOwner = user;
         try
         {
             await _farmRepository.CreateFarmAsync(newFarm);

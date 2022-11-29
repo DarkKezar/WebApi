@@ -28,14 +28,14 @@ public class FarmService : IFarmService
         }
     }
 
-    public async Task<ActionResult> InviteFriendAsync(Guid currentUserId, string email)
+    public async Task<ActionResult> InviteFriendAsync(User user, string email)
     {
         User userToAdd;
         User currentUser;
         try
         {
             userToAdd = await _accountRepository.ReadUserAsync(email);
-            currentUser = await _accountRepository.ReadUserAsync(currentUserId);
+            currentUser = user;
         }catch (Exception e)
         {
             return new NotFoundResult();

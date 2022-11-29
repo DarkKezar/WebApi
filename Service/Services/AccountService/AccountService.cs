@@ -18,9 +18,9 @@ public class AccountService : IAccountService
         _mapper = mapper;
     }
 
-    public async Task<ActionResult<UserShowModel>> GetUserDataAsync(Guid id)
+    public async Task<ActionResult<UserShowModel>> GetUserDataAsync(User user)
     {
-        return _mapper.Map<UserShowModel>(await _accountRepository.ReadUserAsync(id));
+        return _mapper.Map<UserShowModel>(user);
     }
 
     public async Task<ActionResult> SignUpAsync(UserCreationModel model)
@@ -37,27 +37,27 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<IdentityResult> ChangePasswordAsync(UserUpdateModel model, Guid id)
+    public async Task<IdentityResult> ChangePasswordAsync(UserUpdateModel model, User user)
     {
-        User user = await _accountRepository.ReadUserAsync(id);
+       // User user = await _accountRepository.ReadUserAsync(id);
         return await _accountRepository.UpdatePasswordAsync(user, model.OldPassword, model.NewPassword);
     }
 
-    public async Task<ActionResult> ChangeEmailAsync(UserUpdateModel model, Guid id)
+    public async Task<ActionResult> ChangeEmailAsync(UserUpdateModel model, User user)
     {
-        User user = await _accountRepository.ReadUserAsync(id);
-        user = _mapper.Map<User>(model);
+        //User user = await _accountRepository.ReadUserAsync(id);
+        user = _mapper.Map<User>(user);
         await _accountRepository.UpdateUserAsync(user);
         return new OkResult();
     }
 
-    public async Task<ActionResult> ChangePhotoAsync(UserUpdateModel model, Guid id)
+    public async Task<ActionResult> ChangePhotoAsync(UserUpdateModel model, User user)
     {
-        return await this.ChangeEmailAsync(model, id);
+        return await this.ChangeEmailAsync(model, user);
     }
 
-    public async Task<ActionResult> ChangeUserNameAsync(UserUpdateModel model, Guid id)
+    public async Task<ActionResult> ChangeUserNameAsync(UserUpdateModel model, User user)
     {
-        return await this.ChangeEmailAsync(model, id);
+        return await this.ChangeEmailAsync(model, user);
     }
 }

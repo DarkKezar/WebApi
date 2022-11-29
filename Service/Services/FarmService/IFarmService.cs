@@ -6,5 +6,5 @@ namespace Service.Services.FarmService;
 public interface IFarmService
 {
     public Task<ActionResult<Farm>> GetFarmInfoAsync(Guid Id);
-    public Task<ActionResult> InviteFriendAsync(Guid currentUserId, string email);
+    public Task<ActionResult> InviteFriendAsync(User user, string email);
 }
