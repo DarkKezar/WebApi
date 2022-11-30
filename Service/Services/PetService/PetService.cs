@@ -1,6 +1,7 @@
 using AutoMapper;
 using Core.Entities;
 using Core.Repositories.AccountRepository;
+using Core.Repositories.FarmRepository;
 using Core.Repositories.PetRepository;
 using Core.Repositories.PetStatsRepository;
 using Core.Repositories.UserActionRepository;
@@ -15,16 +16,18 @@ public class PetService : IPetService
     private readonly IPetStatsRepository _statsRepository;
     private readonly IUserActionRepository _actionRepository;
     private readonly IAccountRepository _accountRepository;
+    private readonly IFarmRepository _farmRepository;
     private readonly IMapper _mapper;
     private const int feedTime = 1;
-    
 
-    public PetService(IPetRepository petRepository, IPetStatsRepository statsRepository, IUserActionRepository actionRepository, IAccountRepository accountRepository, IMapper mapper)
+
+    public PetService(IPetRepository petRepository, IPetStatsRepository statsRepository, IUserActionRepository actionRepository, IAccountRepository accountRepository, IFarmRepository farmRepository, IMapper mapper)
     {
         _petRepository = petRepository;
         _statsRepository = statsRepository;
         _actionRepository = actionRepository;
         _accountRepository = accountRepository;
+        _farmRepository = farmRepository;
         _mapper = mapper;
     }
 
@@ -41,74 +44,83 @@ public class PetService : IPetService
         
     }
 
-    public async Task<ActionResult> CreatePetAsync(User user, PetCreationModel model)
+    public async Task<ActionResult> CreatePetAsync(Guid userId, PetCreationModel model)
     {
+        User user = await _accountRepository.ReadUserAsync(userId);
         if (!(await _petRepository.isExistAsync(model.Name)))
         {
             Pet newPet = _mapper.Map<Pet>(model);
             PetStats newPetStats = new PetStats();
 
-            
-            //In ideal condition this must be transaction
-            await _statsRepository.CreatePetStatsAsync(newPetStats);
-            newPet.Farm = user.MyFarm;
+
+            newPetStats.HungerLevel = HungerLevelEnum.FULL;
+            newPetStats.ThirstyLevel = ThirstyLevelEnum.FULL;
+            newPetStats.HappyDaysCount = 0;
+            newPet.BirthDate = DateTime.UtcNow;
+            newPet.DeathDate = null;
             newPet.Stats = newPetStats;
-            await _petRepository.CreatePetAsync(newPet, newPetStats);
-            //transaction end
+            if (user.MyFarm.Pets == null)
+                user.MyFarm.Pets = new List<Pet>();
+            user.MyFarm.Pets.Add(newPet);
+
             
+            await _petRepository.CreatePetAsync(newPet, newPetStats);
+            await _farmRepository.UpdateFarmAsync(user.MyFarm);
             return new OkResult();
         }
         else return new BadRequestObjectResult("Already exist");
     }
 
-    public async Task<ActionResult> FeedPetAsync(User user, Guid id)
+    public async Task<ActionResult> FeedPetAsync(Guid userId, Guid id)
     {
-        if ((await _actionRepository.ReadLastUserActionAsync(id, ActionEnum.FEED)).Date.AddDays(feedTime) < DateTime.Now)
+        User user = await _accountRepository.ReadUserAsync(userId);
+        UserAction userAction = (await _actionRepository.ReadLastUserActionAsync(id, ActionEnum.FEED));
+        if (userAction == null || userAction.Date.AddDays(feedTime) < DateTime.Now)
         {
-            PetStats stats = await _statsRepository.ReadPetStatsAsync(id);
-            switch (stats.HungerLevel)
+            Pet pet = await _petRepository.ReadPetAsync(id);
+            switch (pet.Stats.HungerLevel)
             {
                 case HungerLevelEnum.DEAD:
                     return new BadRequestObjectResult("Pet is dead");
                 case HungerLevelEnum.FULL:
                     return new BadRequestObjectResult("Pet is full");
                 default:
-                    stats.HungerLevel++;
+                    pet.Stats.HungerLevel++;
                     UserAction action = new UserAction();
                     action.Action = ActionEnum.FEED;
-                    action.Date = DateTime.Now;
+                    action.Date = DateTime.UtcNow;
                     action.Pet = await _petRepository.ReadPetAsync(id);
                     action.User = user;
-                    await _statsRepository.UpdatePetStatsAsync(stats);
                     await _actionRepository.CreateUserActionAsync(action);
-                    await _statsRepository.UpdatePetStatsAsync(stats);
+                    await _statsRepository.UpdatePetStatsAsync(pet.Stats);
                     return new OkResult();
             }
         }
         else return new BadRequestObjectResult("Already feed");
     }
 
-    public async Task<ActionResult> GetDrinkPetAsync(User user, Guid id)
+    public async Task<ActionResult> GetDrinkPetAsync(Guid userId, Guid id)
     {
-        if ((await _actionRepository.ReadLastUserActionAsync(id, ActionEnum.DRINK)).Date.AddDays(feedTime) < DateTime.Now)
+        UserAction userAction = (await _actionRepository.ReadLastUserActionAsync(id, ActionEnum.DRINK));
+        if (userAction == null || userAction.Date.AddDays(feedTime) < DateTime.Now)
         {
-            PetStats stats = await _statsRepository.ReadPetStatsAsync(id);
-            switch (stats.ThirstyLevel)
+            User user = await _accountRepository.ReadUserAsync(userId);
+            Pet pet = await _petRepository.ReadPetAsync(id);
+            switch (pet.Stats.ThirstyLevel)
             {
                 case ThirstyLevelEnum.DEAD:
                     return new BadRequestObjectResult("Pet is dead");
                 case ThirstyLevelEnum.FULL:
                     return new BadRequestObjectResult("Pet is full");
                 default:
-                    stats.ThirstyLevel++;
+                    pet.Stats.ThirstyLevel++;
                     UserAction action = new UserAction();
                     action.Action = ActionEnum.DRINK;
-                    action.Date = DateTime.Now;
+                    action.Date = DateTime.UtcNow;
                     action.Pet = await _petRepository.ReadPetAsync(id);
                     action.User = user;
-                    await _statsRepository.UpdatePetStatsAsync(stats);
                     await _actionRepository.CreateUserActionAsync(action);
-                    await _statsRepository.UpdatePetStatsAsync(stats);
+                    await _statsRepository.UpdatePetStatsAsync(pet.Stats);
                     return new OkResult();
             }
         }

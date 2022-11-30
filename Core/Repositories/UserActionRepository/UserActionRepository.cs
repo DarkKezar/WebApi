@@ -1,14 +1,14 @@
+using Core.Context;
 using Core.Entities;
 using Microsoft.EntityFrameworkCore;
-using AppContext = Core.Context.AppContext;
 
 namespace Core.Repositories.UserActionRepository;
 
 public class UserActionRepository : IUserActionRepository
 {
-    private readonly AppContext _context;
+    private readonly PetContext _context;
 
-    public UserActionRepository(AppContext context)
+    public UserActionRepository(PetContext context)
     {
         _context = context;
     }
@@ -33,7 +33,7 @@ public class UserActionRepository : IUserActionRepository
     public async Task<UserAction> ReadLastUserActionAsync(Guid petId, ActionEnum type)
     {
         return await _context.Actions.OrderBy(a => a.Date).
-                            FirstAsync(p => p.Pet.Id == petId && p.Action == type);
+                            FirstOrDefaultAsync(p => p.Pet.Id == petId && p.Action == type);
     }
 
     public async Task<List<UserAction>> ReadAllUserActionAsync(User user)

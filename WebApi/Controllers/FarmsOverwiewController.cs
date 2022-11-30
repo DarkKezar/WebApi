@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Service.DTO;
 using Service.Services.FarmsService;
+using Service.Validators;
 
 namespace WebApi.Controllers;
 
@@ -25,14 +26,16 @@ public class FarmsOverwiewController : Controller
     [Route("MyFarm")]
     public async Task<ActionResult<Farm>> GetMyFarmAsync()
     {
-        return await _farmsService.GetMyFarmAsync((await _userManager.GetUserAsync(null)));
+        Guid ID =  Guid.Parse(this.HttpContext.User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault());
+        return await _farmsService.GetMyFarmAsync(ID);
     }
 
     [HttpGet]
     [Route("CollabFarms")]
     public async Task<ActionResult<List<Farm>>> GetCollabFarmsAsync()
     {
-        return await _farmsService.GetCollabFarmsAsync((await _userManager.GetUserAsync(null)));
+        Guid ID = Guid.Parse(this.HttpContext.User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault());
+        return await _farmsService.GetCollabFarmsAsync(ID);
     }
 
     
@@ -40,6 +43,10 @@ public class FarmsOverwiewController : Controller
     [Route("CreateFarm")]
     public async Task<ActionResult> CreateNewFarmAsync(FarmCreationModel model)
     {
-        return await _farmsService.CreateNewFarmAsync((await _userManager.GetUserAsync(null)), model);
+        FarmCMValidator validator = new FarmCMValidator();
+        Guid ID = Guid.Parse(this.HttpContext.User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault());
+        if (validator.Validate(model).IsValid)
+            return await _farmsService.CreateNewFarmAsync(ID, model);
+        else return new BadRequestResult();
     }
 }

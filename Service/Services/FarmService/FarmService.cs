@@ -28,14 +28,14 @@ public class FarmService : IFarmService
         }
     }
 
-    public async Task<ActionResult> InviteFriendAsync(User user, string email)
+    public async Task<ActionResult> InviteFriendAsync(Guid id, string email)
     {
         User userToAdd;
         User currentUser;
         try
         {
             userToAdd = await _accountRepository.ReadUserAsync(email);
-            currentUser = user;
+            currentUser = await _accountRepository.ReadUserAsync(id);
         }catch (Exception e)
         {
             return new NotFoundResult();
@@ -45,8 +45,7 @@ public class FarmService : IFarmService
         if (farm == null) return new NotFoundObjectResult("You have not your own farm");
         else
         {
-            farm.FarmCollabersId.Add(userToAdd.Id);
-            userToAdd.Collaborations.Add(farm);
+            userToAdd.CollaborationsId.Add(farm.Id);
             await _accountRepository.UpdateUserAsync(userToAdd);
             await _farmRepository.UpdateFarmAsync(farm);
         

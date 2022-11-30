@@ -1,15 +1,14 @@
 using Core.Entities;
 using Core.Context;
 using Microsoft.EntityFrameworkCore;
-using AppContext = Core.Context.AppContext;
 
 namespace Core.Repositories.PetStatsRepository;
 
 public class PetStatsRepository : IPetStatsRepository
 {
-    private readonly AppContext _context;
+    private readonly PetContext _context;
 
-    public PetStatsRepository(AppContext context)
+    public PetStatsRepository(PetContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
@@ -34,13 +33,13 @@ public class PetStatsRepository : IPetStatsRepository
 
     public async Task<PetStats> ReadPetStatsAsync(Guid Id)
     {
-        return await _context.PetStats.FirstAsync(s => s.Pet.Id == Id);
+        return (await _context.Pets.FirstAsync(p => p.Id == Id)).Stats;
     }
-
+/*
     public async Task<List<PetStats>> ReadPetStatsAsync(List<Guid> petsId)
     {
         return await _context.PetStats.Where(s => petsId.Contains(s.Pet.Id)).ToListAsync();
-    }
+    }*/
 
     public async Task<List<PetStats>> ReadAllPetStatsAsync(int Count, int Page)
     {

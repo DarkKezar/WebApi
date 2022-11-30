@@ -6,7 +6,7 @@ namespace Service.AutoMappers;
 
 public class AppMappingPet : Profile
 {
-    protected AppMappingPet()
+    public AppMappingPet()
     {
         CreateMap<PetCreationModel, Pet>();
     }

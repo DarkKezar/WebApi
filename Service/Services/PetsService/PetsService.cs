@@ -36,15 +36,17 @@ public class PetsService : IPetsService
         }
     }
 
-    public async Task<ActionResult> FeedPetsAsync(User user, List<Guid> ids)
+    public async Task<ActionResult> FeedPetsAsync(Guid userId, List<Guid> ids)
     {
+        User user = await _accountRepository.ReadUserAsync(userId);
         List<ActionResult> answer = new List<ActionResult>();
         foreach (Guid id in ids)
         {
-            if ((await _actionRepository.ReadLastUserActionAsync(id, ActionEnum.FEED)).Date.AddDays(feedTime) < DateTime.Now)
+            UserAction userAction = (await _actionRepository.ReadLastUserActionAsync(id, ActionEnum.FEED));
+            if (userAction == null || userAction.Date.AddDays(feedTime) < DateTime.Now)
             {
-                PetStats stats = await _statsRepository.ReadPetStatsAsync(id);
-                switch (stats.HungerLevel)
+                Pet pet = await _petRepository.ReadPetAsync(id);
+                switch (pet.Stats.HungerLevel)
                 {
                     case HungerLevelEnum.DEAD:
                         answer.Add( new BadRequestObjectResult("Pet is dead") );
@@ -53,13 +55,13 @@ public class PetsService : IPetsService
                         answer.Add( new BadRequestObjectResult("Pet is full") );
                         break;
                     default:
-                        stats.HungerLevel++;
+                        pet.Stats.HungerLevel++;
                         UserAction action = new UserAction();
                         action.Action = ActionEnum.FEED;
-                        action.Date = DateTime.Now;
+                        action.Date = DateTime.UtcNow;
                         action.Pet = await _petRepository.ReadPetAsync(id);
                         action.User = user;
-                        await _statsRepository.UpdatePetStatsAsync(stats);
+                        await _statsRepository.UpdatePetStatsAsync(pet.Stats);
                         await _actionRepository.CreateUserActionAsync(action);
                         answer.Add( new OkResult());
                         break;
@@ -71,15 +73,17 @@ public class PetsService : IPetsService
         return new OkObjectResult(answer);
     }
 
-    public async Task<ActionResult> GetDrinkPetsAsync(User user, List<Guid> ids)
+    public async Task<ActionResult> GetDrinkPetsAsync(Guid userId, List<Guid> ids)
     {
+        User user = await _accountRepository.ReadUserAsync(userId);
         List<ActionResult> answer = new List<ActionResult>();
         foreach (Guid id in ids)
         {
-            if ((await _actionRepository.ReadLastUserActionAsync(id, ActionEnum.DRINK)).Date.AddDays(feedTime) < DateTime.Now)
+            UserAction userAction = (await _actionRepository.ReadLastUserActionAsync(id, ActionEnum.DRINK));
+            if (userAction == null || userAction.Date.AddDays(feedTime) < DateTime.Now)
             {
-                PetStats stats = await _statsRepository.ReadPetStatsAsync(id);
-                switch (stats.ThirstyLevel)
+                Pet pet = await _petRepository.ReadPetAsync(id);
+                switch (pet.Stats.ThirstyLevel)
                 {
                     case ThirstyLevelEnum.DEAD:
                         answer.Add( new BadRequestObjectResult("Pet is dead") );
@@ -88,15 +92,14 @@ public class PetsService : IPetsService
                         answer.Add( new BadRequestObjectResult("Pet is full") );
                         break;
                     default:
-                        stats.ThirstyLevel++;
+                        pet.Stats.ThirstyLevel++;
                         UserAction action = new UserAction();
                         action.Action = ActionEnum.DRINK;
-                        action.Date = DateTime.Now;
+                        action.Date = DateTime.UtcNow;
                         action.Pet = await _petRepository.ReadPetAsync(id);
                         action.User = user;
-                        await _statsRepository.UpdatePetStatsAsync(stats);
                         await _actionRepository.CreateUserActionAsync(action);
-                        await _statsRepository.UpdatePetStatsAsync(stats);
+                        await _statsRepository.UpdatePetStatsAsync(pet.Stats);
                         answer.Add( new OkResult());
                         break;
                 }

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AutoMapper;
 using Core.Entities;
 using Core.Repositories.AccountRepository;
@@ -18,9 +19,9 @@ public class AccountService : IAccountService
         _mapper = mapper;
     }
 
-    public async Task<ActionResult<UserShowModel>> GetUserDataAsync(User user)
+    public async Task<ActionResult<UserShowModel>> GetUserDataAsync(Guid id)
     {
-        return _mapper.Map<UserShowModel>(user);
+        return _mapper.Map<UserShowModel>(await _accountRepository.ReadUserAsync(id));
     }
 
     public async Task<ActionResult> SignUpAsync(UserCreationModel model)
@@ -37,27 +38,27 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<IdentityResult> ChangePasswordAsync(UserUpdateModel model, User user)
-    {
-       // User user = await _accountRepository.ReadUserAsync(id);
-        return await _accountRepository.UpdatePasswordAsync(user, model.OldPassword, model.NewPassword);
+    public async Task<IdentityResult> ChangePasswordAsync(UserUpdateModel model, Guid id)
+    { 
+        User user = await _accountRepository.ReadUserAsync(id);
+       return await _accountRepository.UpdatePasswordAsync(user, model.OldPassword, model.NewPassword);
     }
 
-    public async Task<ActionResult> ChangeEmailAsync(UserUpdateModel model, User user)
+    public async Task<ActionResult> ChangeEmailAsync(UserUpdateModel model, Guid id)
     {
-        //User user = await _accountRepository.ReadUserAsync(id);
+        User user = await _accountRepository.ReadUserAsync(id);
         user = _mapper.Map<User>(user);
         await _accountRepository.UpdateUserAsync(user);
         return new OkResult();
     }
 
-    public async Task<ActionResult> ChangePhotoAsync(UserUpdateModel model, User user)
+    public async Task<ActionResult> ChangePhotoAsync(UserUpdateModel model, Guid id)
     {
-        return await this.ChangeEmailAsync(model, user);
+        return await this.ChangeEmailAsync(model, id);
     }
 
-    public async Task<ActionResult> ChangeUserNameAsync(UserUpdateModel model, User user)
+    public async Task<ActionResult> ChangeUserNameAsync(UserUpdateModel model, Guid id)
     {
-        return await this.ChangeEmailAsync(model, user);
+        return await this.ChangeEmailAsync(model, id);
     }
 }

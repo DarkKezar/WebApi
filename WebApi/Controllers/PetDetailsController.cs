@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Service.DTO;
 using Service.Services.PetService;
+using Service.Validators;
 
 namespace WebApi.Controllers;
 
@@ -33,20 +34,27 @@ public class PetDetailsController : Controller
     [Route("CreatePet")]
     public async Task<ActionResult> CreatePetAsync(PetCreationModel model)
     {
-        return await _petService.CreatePetAsync((await _userManager.GetUserAsync(null)), model);
+        PetCMValidator validator = new PetCMValidator();
+        Guid ID =  Guid.Parse(this.HttpContext.User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault());
+
+        if (validator.Validate(model).IsValid)
+            return await _petService.CreatePetAsync(ID, model);
+        else return new BadRequestObjectResult("Model is not correct");
     }
 
     [HttpPatch]
     [Route("FeedPet")]
     public async Task<ActionResult> FeedPetAsync(Guid Id)
     {
-        return await _petService.FeedPetAsync((await _userManager.GetUserAsync(null)), Id);
+        Guid ID =  Guid.Parse(this.HttpContext.User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault());
+        return await _petService.FeedPetAsync(ID, Id);
     }
     
     [HttpPatch]
     [Route("GetDrinkPet")]
     public async Task<ActionResult> GetDrinkPetAsync(Guid Id)
     {
-        return await _petService.GetDrinkPetAsync((await _userManager.GetUserAsync(null)), Id);
+        Guid ID =  Guid.Parse(this.HttpContext.User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault());
+        return await _petService.GetDrinkPetAsync(ID, Id);
     }
 }

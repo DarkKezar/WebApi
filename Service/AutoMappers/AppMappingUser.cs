@@ -6,7 +6,7 @@ namespace Service.AutoMappers;
 
 public class AppMappingUser : Profile
 {
-    protected AppMappingUser()
+    public AppMappingUser()
     {
         CreateMap<UserCreationModel, User>();
         CreateMap<UserUpdateModel, User>();

@@ -1,4 +1,5 @@
 using System.Text;
+using Core.Context;
 using Core.Entities;
 using Core.Repositories.AccountRepository;
 using Core.Repositories.FarmRepository;
@@ -10,26 +11,27 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Service.AutoMappers;
 using Service.Services.AccountService;
 using Service.Services.FarmService;
 using Service.Services.FarmsService;
 using Service.Services.PetService;
 using Service.Services.PetsService;
-using AppContext = Core.Context.AppContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //builder.Services.TryAddScoped<UserManager<User>>();
 // Add services to the container.
 builder.Services
-    .AddDbContext<AppContext>
+    .AddDbContext<PetContext>
         (options => options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]));
-builder.Services.AddIdentity<User, Role>().AddEntityFrameworkStores<AppContext>();
+builder.Services.AddIdentity<User, Role>().AddEntityFrameworkStores<PetContext>();
 
 
 //DI
-builder.Services.AddAutoMapper(typeof(AppMappingFarm), typeof(AppMappingUser), typeof(AppMappingUser));
+builder.Services.AddAutoMapper(typeof(AppMappingFarm), typeof(AppMappingPet), typeof(AppMappingUser));
+
 //rep
 builder.Services.AddTransient<IAccountRepository, AccountRepositroy>();
 builder.Services.AddTransient<IFarmRepository, FarmRepository>();
@@ -48,7 +50,33 @@ builder.Services.AddTransient<IPetService, PetService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(option =>
+{
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
+    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id="Bearer"
+                }
+            },
+            new string[]{}
+        }
+    });
+});
 
 builder.Services.AddAuthentication(options =>
 {

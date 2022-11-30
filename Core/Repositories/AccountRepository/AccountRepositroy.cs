@@ -1,16 +1,16 @@
+using Core.Context;
 using Core.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using AppContext = Core.Context.AppContext;
 
 namespace Core.Repositories.AccountRepository;
 
 public class AccountRepositroy : IAccountRepository
 {
-    private readonly AppContext _context;
+    private readonly PetContext _context;
     private readonly UserManager<User> _userManager;
 
-    public AccountRepositroy(AppContext context, UserManager<User> userManager)
+    public AccountRepositroy(PetContext context, UserManager<User> userManager)
     {
         _context = context;
         _userManager = userManager;
@@ -19,7 +19,10 @@ public class AccountRepositroy : IAccountRepository
 
     public async Task CreateUserAsync(User user, string password)
     {
-        await _userManager.CreateAsync(user, password);
+        user.UserName = user.Email;
+        user.NormalizedUserName = user.Email.ToUpper();
+        user.CollaborationsId = new List<Guid>();
+        IdentityResult result = await _userManager.CreateAsync(user, password);
         await _context.SaveChangesAsync();
     }
 
@@ -31,7 +34,7 @@ public class AccountRepositroy : IAccountRepository
 
     public async Task UpdateUserAsync(User user)
     {
-        await _userManager.UpdateAsync(user);
+        _context.Users.Update(user);
         await _context.SaveChangesAsync();
     }
 
@@ -42,7 +45,7 @@ public class AccountRepositroy : IAccountRepository
 
     public async Task<User> ReadUserAsync(Guid id)
     {
-        return await _context.Users.FirstAsync(u => u.Id == id);
+        return await _context.Users.Include(u => u.MyFarm).FirstAsync(u => u.Id == id);
     }
     public async Task<User> ReadUserAsync(string email)
     {

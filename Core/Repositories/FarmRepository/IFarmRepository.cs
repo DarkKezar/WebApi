@@ -8,5 +8,5 @@ public interface IFarmRepository
     public Task DeleteFarmAsync(Farm farm);
     public Task UpdateFarmAsync(Farm farm);
     public Task<Farm> ReadMyFarmAsync(Guid userId);
-    public Task<List<Farm>> ReadMyCollabFarmsAsync(Guid userId);
+    public Task<List<Farm>> ReadMyCollabFarmsAsync(User user);
 }

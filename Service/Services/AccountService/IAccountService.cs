@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Core.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,10 +8,10 @@ namespace Service.Services.AccountService;
 
 public interface IAccountService
 {
-    public Task<ActionResult<UserShowModel>> GetUserDataAsync(User user);
+    public Task<ActionResult<UserShowModel>> GetUserDataAsync(Guid id);
     public Task<ActionResult> SignUpAsync(UserCreationModel model);
-    public Task<IdentityResult> ChangePasswordAsync(UserUpdateModel model, User user);
-    public Task<ActionResult> ChangeEmailAsync(UserUpdateModel model, User user);
-    public Task<ActionResult> ChangePhotoAsync(UserUpdateModel model, User user);
-    public Task<ActionResult> ChangeUserNameAsync(UserUpdateModel model, User user);
+    public Task<IdentityResult> ChangePasswordAsync(UserUpdateModel model, Guid id);
+    public Task<ActionResult> ChangeEmailAsync(UserUpdateModel model, Guid id);
+    public Task<ActionResult> ChangePhotoAsync(UserUpdateModel model, Guid id);
+    public Task<ActionResult> ChangeUserNameAsync(UserUpdateModel model, Guid id);
 }

@@ -8,6 +8,6 @@ public class Farm
     public Guid Id { get; set; }
     public string Name { get; set; }
     public List<Pet> Pets { get; set; }
-    public User FarmOwner { get; set; }
-    public List<Guid> FarmCollabersId { get; set; }
+    public Guid userId { get; set; }
+    //public List<Guid> FarmCollabersId { get; set; }
 }

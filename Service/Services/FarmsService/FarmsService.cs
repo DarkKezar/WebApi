@@ -13,23 +13,38 @@ public class FarmsService : IFarmsService
     private readonly IFarmRepository _farmRepository;
     private readonly IMapper _mapper;
 
-    public async Task<ActionResult<Farm>> GetMyFarmAsync(User user)
+    public FarmsService(IAccountRepository accountRepository, IFarmRepository farmRepository, IMapper mapper)
     {
-        return user.MyFarm;
+        _accountRepository = accountRepository;
+        _farmRepository = farmRepository;
+        _mapper = mapper;
     }
 
-    public async Task<ActionResult<List<Farm>>> GetCollabFarmsAsync(User user)
+    public async Task<ActionResult<Farm>> GetMyFarmAsync(Guid id)
     {
-        return user.Collaborations;
+        User user = await _accountRepository.ReadUserAsync(id);
+        return await _farmRepository.ReadMyFarmAsync(user.MyFarm.Id);;
+    }
+    
+    
+
+    public async Task<ActionResult<List<Farm>>> GetCollabFarmsAsync(Guid id)
+    {
+        User user = await _accountRepository.ReadUserAsync(id);
+        return await _farmRepository.ReadMyCollabFarmsAsync(user);
     }
 
-    public async Task<ActionResult> CreateNewFarmAsync(User user, FarmCreationModel model)
+    public async Task<ActionResult> CreateNewFarmAsync(Guid id, FarmCreationModel model)
     {
+        User user = await _accountRepository.ReadUserAsync(id);
+        if (user.MyFarm != null) return new BadRequestObjectResult("Farm already exist. User can't have more than 1 farm");
         Farm newFarm = _mapper.Map<Farm>(model);
-        newFarm.FarmOwner = user;
+        newFarm.userId = user.Id;
+        user.MyFarm = newFarm;
         try
         {
             await _farmRepository.CreateFarmAsync(newFarm);
+            await _accountRepository.UpdateUserAsync(user);
             return new OkResult();
         }
         catch (Exception e)

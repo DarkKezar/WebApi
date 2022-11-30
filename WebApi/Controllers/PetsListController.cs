@@ -32,13 +32,15 @@ public class PetsListController : Controller
     [Route("FeedPets")]
     public async Task<ActionResult> FeedPetsAsync(List<Guid> ids)
     {
-        return await _petsService.FeedPetsAsync((await _userManager.GetUserAsync(null)) ,ids);
+        Guid ID =  Guid.Parse(this.HttpContext.User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault());
+        return await _petsService.FeedPetsAsync(ID ,ids);
     }
     
     [HttpPatch]
     [Route("GetDrinkPets")]
     public async Task<ActionResult> GetDrinkPetsAsync(List<Guid> ids)
     {
-        return await _petsService.GetDrinkPetsAsync((await _userManager.GetUserAsync(null)) ,ids);
+        Guid ID =  Guid.Parse(this.HttpContext.User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault());
+        return await _petsService.GetDrinkPetsAsync(ID ,ids);
     }
 }

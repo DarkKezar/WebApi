@@ -1,15 +1,14 @@
 using Core.Entities;
 using Core.Context;
 using Microsoft.EntityFrameworkCore;
-using AppContext = Core.Context.AppContext;
 
 namespace Core.Repositories.PetRepository;
 
 public class PetRepository : IPetRepository
 {
-    private readonly AppContext _context;
+    private readonly PetContext _context;
 
-    public PetRepository(AppContext context)
+    public PetRepository(PetContext context)
     {
         _context = context;
     }
@@ -35,12 +34,12 @@ public class PetRepository : IPetRepository
 
     public async Task<Pet> ReadPetAsync(Guid Id)
     {
-        return await _context.Pets.FirstAsync(p => p.Id == Id);
+        return await _context.Pets.Include(p => p.Stats).FirstAsync(p => p.Id == Id);
     }
 
     public async Task<List<Pet>> ReadAllPetsAsync(Guid farmId)
     {
-        return await _context.Pets.Where(p => p.Farm.Id == farmId).ToListAsync();
+        return (await _context.Farms.Include(f => f.Pets).ThenInclude(p => p.Stats).FirstAsync(f => f.Id == farmId)).Pets;
     }
 
     public async Task<bool> isExistAsync(string name)

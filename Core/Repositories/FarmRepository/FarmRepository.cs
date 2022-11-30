@@ -1,15 +1,14 @@
 using Core.Entities;
 using Core.Context;
 using Microsoft.EntityFrameworkCore;
-using AppContext = Core.Context.AppContext;
 
 namespace Core.Repositories.FarmRepository;
 
 public class FarmRepository : IFarmRepository
 {
-    private readonly AppContext _context;
+    private readonly PetContext _context;
 
-    public FarmRepository(AppContext context)
+    public FarmRepository(PetContext context)
     {
         _context = context;
     }
@@ -32,13 +31,13 @@ public class FarmRepository : IFarmRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<Farm> ReadMyFarmAsync(Guid userId)
+    public async Task<Farm> ReadMyFarmAsync(Guid Id)
     {
-        return await _context.Farms.FirstAsync(f => f.FarmOwner.Id == userId);
+        return await _context.Farms.Include(f => f.Pets).ThenInclude(p => p.Stats).FirstAsync(f => f.Id == Id);
     }
 
-    public async Task<List<Farm>> ReadMyCollabFarmsAsync(Guid userId)
+    public async Task<List<Farm>> ReadMyCollabFarmsAsync(User user)
     {
-        return await _context.Farms.Where(f => f.FarmCollabersId.Contains(userId)).ToListAsync();
+        return await _context.Farms.Where(f => user.CollaborationsId.Contains(f.Id)).Include(f => f.Pets).ThenInclude(p => p.Stats).ToListAsync();
     }
 }

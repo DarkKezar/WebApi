@@ -32,6 +32,7 @@ public class FarmDetailsController : Controller
     [Route("AddUser")]
     public async Task<ActionResult> InviteFriendAsync(string email)
     {
-        return await _farmService.InviteFriendAsync((await _userManager.GetUserAsync(null)), email);
+        Guid ID =  Guid.Parse(this.HttpContext.User.Claims.Where(c => c.Type == "Id").Select(c => c.Value).SingleOrDefault());
+        return await _farmService.InviteFriendAsync(ID, email);
     }
 }

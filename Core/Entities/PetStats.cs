@@ -8,8 +8,7 @@ public class PetStats
 {
     [Key]
     public Guid Id { get; set; }
-    public Pet Pet { get; set; }
-    public uint Age { get; set; }
+    //public Pet Pet { get; set; }
     public HungerLevelEnum HungerLevel { get; set; }
     public ThirstyLevelEnum ThirstyLevel { get; set; }
     public uint HappyDaysCount { get; set; }
