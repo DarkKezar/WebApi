@@ -11,6 +11,10 @@ public class PetContext : IdentityDbContext<User, Role, Guid>
     public DbSet<Farm> Farms { get; set; }
     public DbSet<UserAction> Actions { get; set; }
 
+    public PetContext()
+    {
+    }
+
     public PetContext(DbContextOptions<PetContext> options) : base(options)
     { }
 }
