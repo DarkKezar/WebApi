@@ -35,7 +35,31 @@ public class PetService : IPetService
     {
         try
         {
-            return await _petRepository.ReadPetAsync(id);
+            Pet pet = await _petRepository.ReadPetAsync(id);
+            if (pet.DeathDate == null)
+            {
+                UserAction userActionFEED = (await _actionRepository.ReadLastUserActionAsync(id, ActionEnum.FEED));
+                UserAction userActionDRINK = (await _actionRepository.ReadLastUserActionAsync(id, ActionEnum.DRINK));
+                if ((userActionFEED != null && userActionFEED.Date.AddDays(feedTime) < DateTime.UtcNow) ||
+                    (userActionFEED == null && pet.BirthDate.AddDays(feedTime) < DateTime.UtcNow))
+                {
+                    pet.Stats.HungerLevel--;
+                    if(pet.Stats.HungerLevel == HungerLevelEnum.DEAD)
+                        pet.DeathDate = DateTime.UtcNow;
+                }else 
+
+                if ((userActionDRINK != null && userActionDRINK.Date.AddDays(feedTime) < DateTime.UtcNow) ||
+                    (userActionDRINK == null && pet.BirthDate.AddDays(feedTime) < DateTime.UtcNow))
+                {
+                    pet.Stats.ThirstyLevel--;
+                    if(pet.Stats.ThirstyLevel == ThirstyLevelEnum.DEAD)
+                        pet.DeathDate = DateTime.UtcNow;
+                }
+                await _petRepository.UpdatePetAsync(pet);
+                await _statsRepository.UpdatePetStatsAsync(pet.Stats);
+            }
+
+            return pet;
         }
         catch (Exception e)
         {
