@@ -55,6 +55,7 @@ public class PetService : IPetService
                     if(pet.Stats.ThirstyLevel == ThirstyLevelEnum.DEAD)
                         pet.DeathDate = DateTime.UtcNow;
                 }
+                
                 await _petRepository.UpdatePetAsync(pet);
                 await _statsRepository.UpdatePetStatsAsync(pet.Stats);
             }

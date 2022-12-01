@@ -33,6 +33,7 @@ public class PetsService : IPetsService
             {
                 if (pet.DeathDate == null)
                 {
+                    //Ошибка! Необходимо поставить ограничение на 1 уменьшение в день 
                     UserAction userActionFEED = (await _actionRepository.ReadLastUserActionAsync(pet.Id, ActionEnum.FEED));
                     UserAction userActionDRINK = (await _actionRepository.ReadLastUserActionAsync(pet.Id, ActionEnum.DRINK));
                     if ((userActionFEED != null && userActionFEED.Date.AddDays(feedTime) < DateTime.UtcNow) ||
